@@ -1,0 +1,89 @@
+// Vercel Serverless Function: shared, real-time community tickets with anti-spam.
+// Storage: Upstash Redis via REST (add the "Upstash for Redis" integration in Vercel → Storage).
+// Works with either UPSTASH_REDIS_REST_URL/TOKEN or KV_REST_API_URL/TOKEN env vars.
+
+const URL_ = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
+const TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
+
+const VILLAGES = {
+  'Pachakkara (North)': ['Abhinand', 'GG-14'],
+  'Puzhayoram (East)': ['Gokul', 'GG-07'],
+  'Kavumthazham (South)': ['Sneha', 'GG-22'],
+  'Thengumpadam (West)': ['Vishnu', 'GG-31'],
+  'Manjadikunnu': ['Gokul', 'GG-07'],
+  'Kuttikkadavu': ['Vishnu', 'GG-31'],
+};
+const TYPES = ['Water', 'Air', 'Waste'];
+const BAD_WORDS = ['fuck', 'shit', 'bitch', 'bastard', 'asshole', 'dick', 'porn', 'sex', 'idiot', 'stupid', 'loser', 'myre', 'myran', 'poori', 'thendi', 'kunna', 'pottan', 'naaye'];
+const LIST = 'gg:tickets';
+const MAX_KEEP = 60;
+
+async function redis(...cmd) {
+  const r = await fetch(URL_, { method: 'POST', headers: { Authorization: `Bearer ${TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify(cmd) });
+  if (!r.ok) throw new Error('redis ' + r.status);
+  return (await r.json()).result;
+}
+
+function validate(b) {
+  const name = String(b.name || '').trim().replace(/\s+/g, ' ');
+  const desc = String(b.desc || '').trim().replace(/\s+/g, ' ');
+  const village = String(b.village || ''), type = String(b.type || '');
+  if (b.website) return 'Spam detected.';                                  // honeypot
+  if (typeof b.elapsed !== 'number' || b.elapsed < 4000) return 'Please take a moment to fill the form properly.';
+  if (!/^[\p{L}\p{M}][\p{L}\p{M} .'-]{1,39}$/u.test(name)) return 'Enter a valid name (letters only, 2–40 characters).';
+  if (!VILLAGES[village]) return 'Select a valid village.';
+  if (!TYPES.includes(type)) return 'Select a valid issue type.';
+  if (desc.length < 15 || desc.length > 300) return 'Description must be 15–300 characters.';
+  if (desc.split(' ').filter(w => w.length > 1).length < 3) return 'Please describe the issue in a few words.';
+  if (/(https?:\/\/|www\.|\.com|\.in\b|@)/i.test(desc + name)) return 'Links, emails or handles are not allowed.';
+  if (/(.)\1{4,}/u.test(desc + name)) return 'Please avoid repeated characters.';
+  const caps = desc.replace(/[^A-Za-z]/g, ''); if (caps.length > 15 && caps === caps.toUpperCase()) return 'Please avoid ALL CAPS.';
+  const lower = (desc + ' ' + name).toLowerCase();
+  if (BAD_WORDS.some(w => new RegExp(`(^|[^a-z])${w}([^a-z]|$)`).test(lower))) return 'Please keep the report respectful.';
+  return { name, desc, village, type };
+}
+
+export default async function handler(req, res) {
+  res.setHeader('Cache-Control', 'no-store');
+  if (!URL_ || !TOKEN) return res.status(503).json({ live: false, error: 'Storage not configured' });
+
+  try {
+    if (req.method === 'GET') {
+      const raw = (await redis('LRANGE', LIST, 0, 29)) || [];
+      return res.status(200).json({ live: true, tickets: raw.map(s => JSON.parse(s)) });
+    }
+
+    if (req.method === 'POST') {
+      const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
+      const v = validate(body);
+      if (typeof v === 'string') return res.status(400).json({ error: v });
+
+      const ip = String(req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'x').split(',')[0].trim();
+      // 1 report / 60s per device
+      if (!(await redis('SET', `gg:rl:${ip}`, 1, 'EX', 60, 'NX'))) return res.status(429).json({ error: 'You just submitted a report. Please wait a minute.' });
+      // 5 reports / day per device
+      const day = await redis('INCR', `gg:day:${ip}`);
+      if (day === 1) await redis('EXPIRE', `gg:day:${ip}`, 86400);
+      if (day > 5) return res.status(429).json({ error: 'Daily limit reached (5 reports). Thank you for caring!' });
+      // global flood guard: 40 / 10 min
+      const g = await redis('INCR', 'gg:global');
+      if (g === 1) await redis('EXPIRE', 'gg:global', 600);
+      if (g > 40) return res.status(429).json({ error: 'High traffic right now — please try again in a few minutes.' });
+      // duplicate text guard (1 hr)
+      const key = (v.village + v.type + v.desc).toLowerCase().replace(/[^\p{L}\p{N}]/gu, '').slice(0, 120);
+      if (!(await redis('SET', `gg:dup:${key}`, 1, 'EX', 3600, 'NX'))) return res.status(409).json({ error: 'This issue has already been reported.' });
+
+      const seq = await redis('INCR', 'gg:seq');
+      const [guardian, gid] = VILLAGES[v.village];
+      const ticket = { id: `GG-2026-${String(88 + seq).padStart(3, '0')}`, ...v, guardian, gid, status: 'Assigned', ts: Date.now() };
+      await redis('LPUSH', LIST, JSON.stringify(ticket));
+      await redis('LTRIM', LIST, 0, MAX_KEEP - 1);
+      return res.status(201).json({ ticket });
+    }
+
+    res.setHeader('Allow', 'GET, POST');
+    return res.status(405).json({ error: 'Method not allowed' });
+  } catch (e) {
+    return res.status(500).json({ error: 'Server error, please try again.' });
+  }
+}

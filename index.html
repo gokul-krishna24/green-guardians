@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Green Guardians — Community Environmental Transparency Dashboard | ABC Manufacturing Ltd.</title>
+  <meta name="description" content="Open, youth-led air & water monitoring around ABC Manufacturing Ltd. Live sensor data, incident log, ₹1 Crore CSR budget breakdown and community grievance portal." />
+  <meta name="theme-color" content="#022c22" />
+  <meta name="mobile-web-app-capable" content="yes" /><meta name="apple-mobile-web-app-capable" content="yes" /><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" /><meta name="apple-mobile-web-app-title" content="Green Guardians" /><meta name="format-detection" content="telephone=no" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: {
+        fontFamily: { sans: ['Inter','sans-serif'], display: ['"Plus Jakarta Sans"','sans-serif'], mono: ['"JetBrains Mono"','monospace'] },
+      } }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="font-sans antialiased bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-200 transition-colors duration-300">
+  <div id="scroll-progress" aria-hidden="true"></div><canvas id="particles" aria-hidden="true"></canvas><div id="cursor-spot" class="cursor-el" aria-hidden="true"></div><div id="cursor-ring" class="cursor-el" aria-hidden="true"></div><div id="cursor-dot" class="cursor-el" aria-hidden="true"></div>
+  <div class="bg-orbs" aria-hidden="true"><span></span><span></span><span></span></div>
+
+  <!-- NAV -->
+  <header id="top-nav" class="sticky top-0 z-40 glass-nav">
+    <nav class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+      <a href="#hero" class="flex items-center gap-2 shrink-0" id="nav-logo">
+        <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 grid place-items-center shadow-lg shadow-emerald-500/30"><i data-lucide="leaf" class="w-5 h-5 text-white"></i></span>
+        <span class="leading-tight">
+          <span class="block font-display font-extrabold text-slate-900 dark:text-white">Green Guardians</span>
+          <span class="block text-[10px] uppercase tracking-widest text-emerald-600 dark:text-emerald-400 font-semibold">by ABC Manufacturing</span>
+        </span>
+      </a>
+      <div class="hidden lg:flex items-center gap-1 text-sm font-medium">
+        <a href="#monitor" class="nav-link" id="nav-monitor">Live Monitor</a>
+        <a href="#actions" class="nav-link" id="nav-actions">Action Log</a>
+        <a href="#youth" class="nav-link" id="nav-youth">Youth Hub</a>
+        <a href="#budget" class="nav-link" id="nav-budget">₹1 Cr Budget</a>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="theme-toggle" class="icon-btn" aria-label="Toggle dark mode"><i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i><i data-lucide="moon" class="w-5 h-5 dark:hidden"></i></button>
+        <button id="open-report-nav" class="cta-btn open-report"><i data-lucide="megaphone" class="w-4 h-4"></i><span class="hidden sm:inline">Report an Issue</span><span class="sm:hidden">Report</span></button>
+        <button id="menu-toggle" class="icon-btn lg:hidden" aria-label="Open menu"><i data-lucide="menu" class="w-5 h-5"></i></button>
+      </div>
+    </nav>
+    <div id="mobile-menu" class="lg:hidden hidden border-t border-slate-200/60 dark:border-white/5 px-4 pb-4 pt-2 grid grid-cols-2 gap-2 text-sm font-medium">
+      <a href="#monitor" class="m-link">📡 Live Monitor</a>
+      <a href="#actions" class="m-link">📋 Action Log</a>
+      <a href="#youth" class="m-link">🧑‍🔬 Youth Hub</a>
+      <a href="#budget" class="m-link">💰 ₹1 Cr Budget</a>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section id="hero" class="relative max-w-7xl mx-auto px-4 sm:px-6 pt-10 sm:pt-16 pb-10">
+      <div class="flex flex-wrap gap-2 mb-6 reveal">
+        <span class="live-pill" id="live-status"><span class="pulse-dot"></span>System Active • Last Updated: Today, 09:30 AM by Guardian #14 (Abhinand)</span>
+      </div>
+      <h1 class="font-display font-extrabold text-4xl sm:text-5xl lg:text-7xl tracking-tight text-slate-900 dark:text-white max-w-5xl leading-[1.05] reveal">
+        Green Guardians: <span class="text-gradient">Open Environmental Data</span> by Local Youth
+      </h1>
+      <p class="mt-5 text-base sm:text-xl text-slate-600 dark:text-slate-400 max-w-3xl reveal">Independent Air &amp; Water Monitoring around ABC Manufacturing Ltd. — Audited Quarterly</p>
+      <div class="mt-5 flex flex-wrap gap-2 text-xs font-semibold reveal">
+        <span class="chip"><i data-lucide="indian-rupee" class="w-3.5 h-3.5"></i>Budget: ₹1 Crore</span>
+        <span class="chip"><i data-lucide="scale" class="w-3.5 h-3.5"></i>Companies Act 2013 · Schedule VII Compliant</span>
+        <span class="chip"><i data-lucide="flask-conical" class="w-3.5 h-3.5"></i>NABL Lab Cross-Verified</span>
+      </div>
+      <div class="mt-7 flex flex-wrap gap-3 reveal">
+        <a href="#monitor" class="cta-btn !px-5 !py-3" id="hero-cta-monitor"><i data-lucide="activity" class="w-4 h-4"></i>View Live Readings</a>
+        <a href="#budget" class="ghost-btn" id="hero-cta-budget"><i data-lucide="pie-chart" class="w-4 h-4"></i>Where the ₹1 Cr goes</a>
+      </div>
+
+      <div class="mt-10 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div class="stat-card reveal"><i data-lucide="users" class="stat-ic"></i><div class="stat-num"><span class="counter" data-target="40">0</span></div><p class="stat-lbl">Certified Local Youth Guardians</p></div>
+        <div class="stat-card reveal"><i data-lucide="file-check-2" class="stat-ic"></i><div class="stat-num"><span class="counter" data-target="12">0</span><span class="opacity-50">/12</span></div><p class="stat-lbl">Monthly Public Reports Published</p></div>
+        <div class="stat-card reveal"><i data-lucide="badge-check" class="stat-ic"></i><div class="stat-num"><span class="counter" data-target="86">0</span>%</div><p class="stat-lbl">Community Complaints Resolved (&lt;30 Days)</p></div>
+        <div class="stat-card reveal"><i data-lucide="wallet" class="stat-ic"></i><div class="stat-num">₹<span class="counter" data-target="1" data-decimals="2">0</span> Cr</div><p class="stat-lbl">Full Financial Transparency</p></div>
+      </div>
+    </section>
+
+    <!-- LIVE MONITOR -->
+    <section id="monitor" class="max-w-7xl mx-auto px-4 sm:px-6 py-12 scroll-mt-20">
+      <div class="section-head reveal">
+        <span class="eyebrow"><i data-lucide="radio" class="w-4 h-4"></i>Live Monitor</span>
+        <h2 class="section-title">Station-by-Station Sensor Dashboard</h2>
+        <p class="section-sub">Tap a checkpoint. Every number is compared against the legal limit (BIS IS 10500 / CPCB NAAQS).</p>
+      </div>
+
+      <div id="station-tabs" class="flex gap-2 overflow-x-auto no-scrollbar pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-4 reveal" role="tablist"></div>
+
+      <div class="mt-5 grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="lg:col-span-2 grid grid-cols-2 gap-3 sm:gap-4" id="metric-grid"></div>
+        <aside id="guardian-card" class="glass-card p-5 flex flex-col"></aside>
+        <div class="lg:col-span-3 glass-card p-5 sm:p-6">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div>
+              <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white">6-Month Pollution Trend</h3>
+              <p class="text-sm text-slate-500 dark:text-slate-400" id="trend-sub">Baseline (Jun) → Month 6 (Nov) · interventions taking effect</p>
+            </div>
+            <div class="seg" id="trend-metric">
+              <button data-m="pm25" class="active" id="trend-pm25">PM2.5</button>
+              <button data-m="tds" id="trend-tds">TDS</button>
+            </div>
+          </div>
+          <div class="relative h-64 sm:h-80"><canvas id="trendChart" aria-label="Six month pollution trend chart"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACTION LOG -->
+    <section id="actions" class="max-w-7xl mx-auto px-4 sm:px-6 py-12 scroll-mt-20">
+      <div class="section-head reveal">
+        <span class="eyebrow eyebrow-amber"><i data-lucide="shield-alert" class="w-4 h-4"></i>Radical Honesty · Action Log</span>
+        <h2 class="section-title">“We publish bad numbers too.”</h2>
+        <p class="section-sub">Inspired by Safecast’s open-data ethos. Incidents are logged publicly — with how fast we fixed them. No CSR-washing.</p>
+      </div>
+      <div class="seg mb-6 reveal" id="log-filter">
+        <button data-f="all" class="active" id="filter-all">All</button>
+        <button data-f="incident" id="filter-incident">Incidents</button>
+        <button data-f="routine" id="filter-routine">Routine Checks</button>
+        <button data-f="meeting" id="filter-meeting">Meetings</button>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4" id="log-grid">
+        <!-- Incident -->
+        <article class="log-card reveal glass-card p-5 sm:p-6 lg:col-span-2" data-type="incident">
+          <div class="flex flex-wrap items-center gap-2 mb-3">
+            <span class="tag tag-amber"><i data-lucide="triangle-alert" class="w-3.5 h-3.5"></i>Incident · Resolved</span>
+            <span class="text-xs text-slate-500 font-mono">OCT 2026 · Station 2</span>
+          </div>
+          <h3 class="font-display font-bold text-xl text-slate-900 dark:text-white">Elevated TDS spike at East Stream Outflow</h3>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Peak reading 612 ppm (limit 500 ppm) — detected by Guardian #07 (Gokul)</p>
+          <ol class="timeline mt-5">
+            <li><span class="t-dot bg-rose-500"></span><div><p class="t-title">Spike detected</p><p class="t-meta">04 Oct · 06:45 AM · Guardian #07</p></div></li>
+            <li><span class="t-dot bg-amber-500"></span><div><p class="t-title">Public alert issued within 2 hrs</p><p class="t-meta">SMS + WhatsApp to 3 villages · 08:40 AM</p></div></li>
+            <li><span class="t-dot bg-sky-500"></span><div><p class="t-title">Filtration valve repaired in 9 days</p><p class="t-meta">13 Oct · Plant maintenance, root-cause report published</p></div></li>
+            <li><span class="t-dot bg-emerald-500"></span><div><p class="t-title">Verified safe by external accredited lab</p><p class="t-meta">16 Oct · 228 ppm · NABL Lab Report #EL-26-1104</p></div></li>
+          </ol>
+        </article>
+        <!-- Routine -->
+        <article class="log-card reveal glass-card p-5 sm:p-6" data-type="routine">
+          <span class="tag tag-emerald"><i data-lucide="flask-conical" class="w-3.5 h-3.5"></i>Routine Check</span>
+          <p class="text-xs text-slate-500 font-mono mt-3">NOV 2026 · All Stations</p>
+          <h3 class="font-display font-bold text-xl text-slate-900 dark:text-white mt-1">Quarterly NABL Lab Cross-Check</h3>
+          <p class="text-sm text-slate-600 dark:text-slate-400 mt-2">External accredited lab readings matched Guardian sensor data.</p>
+          <div class="mt-5 flex items-center gap-4">
+            <div class="ring-wrap" style="--p:98.4"><span class="font-display font-extrabold text-xl text-slate-900 dark:text-white">98.4%</span></div>
+            <div class="text-sm"><p class="font-semibold text-slate-900 dark:text-white">Accuracy match</p><p class="text-slate-500">48 samples · 4 stations</p></div>
+          </div>
+        </article>
+        <!-- Meeting -->
+        <article class="log-card reveal glass-card p-5 sm:p-6 lg:col-span-2" data-type="meeting">
+          <div class="flex flex-wrap items-center gap-2 mb-3">
+            <span class="tag tag-sky"><i data-lucide="calendar-clock" class="w-3.5 h-3.5"></i>Upcoming Meeting</span>
+            <span class="text-xs text-slate-500 font-mono">05 DEC 2026 · 10:00 AM · Panchayat Bhavan</span>
+          </div>
+          <h3 class="font-display font-bold text-xl text-slate-900 dark:text-white">Q4 Village Committee Open Review</h3>
+          <div class="grid grid-cols-4 gap-2 sm:gap-3 mt-4 max-w-md" id="countdown">
+            <div class="cd"><span id="cd-d">00</span><small>Days</small></div>
+            <div class="cd"><span id="cd-h">00</span><small>Hrs</small></div>
+            <div class="cd"><span id="cd-m">00</span><small>Min</small></div>
+            <div class="cd"><span id="cd-s">00</span><small>Sec</small></div>
+          </div>
+          <details class="mt-4 group">
+            <summary class="cursor-pointer text-sm font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">Agenda preview <i data-lucide="chevron-down" class="w-4 h-4 group-open:rotate-180 transition"></i></summary>
+            <ul class="mt-3 space-y-2 text-sm text-slate-600 dark:text-slate-300">
+              <li>① Presentation of Q4 data by Guardian team leads</li>
+              <li>② East Stream incident — root-cause &amp; closure review</li>
+              <li>③ Budget utilisation statement (₹ spent vs. planned)</li>
+              <li>④ Open floor: villager questions &amp; new grievances</li>
+              <li>⑤ Vote on Green Belt phase-2 sapling locations</li>
+            </ul>
+          </details>
+        </article>
+        <!-- Tickets feed -->
+        <article class="log-card reveal glass-card p-5 sm:p-6" data-type="all-only" id="tickets-card">
+          <div class="flex items-center justify-between">
+            <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white flex items-center gap-2"><i data-lucide="inbox" class="w-5 h-5 text-emerald-500"></i>Recent Community Tickets</h3>
+            <span class="pulse-dot"></span>
+          </div>
+          <ul id="ticket-feed" class="mt-4 space-y-3 max-h-80 overflow-y-auto pr-1"></ul>
+          <p id="feed-mode" class="mt-3 text-[11px] text-slate-500 flex items-center gap-2"></p>
+          <button class="ghost-btn w-full justify-center mt-4 open-report" id="open-report-feed"><i data-lucide="plus" class="w-4 h-4"></i>File a ticket</button>
+        </article>
+      </div>
+    </section>
+
+    <!-- YOUTH HUB -->
+    <section id="youth" class="max-w-7xl mx-auto px-4 sm:px-6 py-12 scroll-mt-20">
+      <div class="section-head reveal">
+        <span class="eyebrow"><i data-lucide="graduation-cap" class="w-4 h-4"></i>Youth Hub</span>
+        <h2 class="section-title">40 Local Youth. ITI-Certified. Paid Stipends.</h2>
+        <p class="section-sub">Monitoring isn’t outsourced — it’s done by the community that breathes the air and drinks the water.</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="glass-card p-6 md:col-span-2 reveal">
+          <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white mb-4">Meet the Guardian Team</h3>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="youth-grid"></div>
+        </div>
+        <div class="glass-card p-6 reveal">
+          <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white mb-4">Training Pathway</h3>
+          <ul class="space-y-4 text-sm">
+            <li class="flex gap-3"><span class="step">1</span><div><p class="font-semibold text-slate-900 dark:text-white">Selection</p><p class="text-slate-500">18–25 yrs, from 6 surrounding villages, 50% women</p></div></li>
+            <li class="flex gap-3"><span class="step">2</span><div><p class="font-semibold text-slate-900 dark:text-white">ITI Lab Technician Course</p><p class="text-slate-500">3-month NCVT-recognised certification</p></div></li>
+            <li class="flex gap-3"><span class="step">3</span><div><p class="font-semibold text-slate-900 dark:text-white">Field Deployment</p><p class="text-slate-500">₹6,000/month stipend · daily sensor logging</p></div></li>
+            <li class="flex gap-3"><span class="step">4</span><div><p class="font-semibold text-slate-900 dark:text-white">Career Bridge</p><p class="text-slate-500">Placement support with labs &amp; pollution boards</p></div></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- BUDGET -->
+    <section id="budget" class="max-w-7xl mx-auto px-4 sm:px-6 py-12 scroll-mt-20">
+      <div class="section-head reveal">
+        <span class="eyebrow"><i data-lucide="indian-rupee" class="w-4 h-4"></i>₹1 Cr Budget</span>
+        <h2 class="section-title">Every Rupee, Accounted For</h2>
+        <p class="section-sub">Tap a slice or a line item to see what it covers and its Schedule VII alignment.</p>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
+        <div class="glass-card p-6 lg:col-span-2 flex flex-col items-center reveal">
+          <div class="relative w-full max-w-[300px] aspect-square">
+            <canvas id="budgetChart" aria-label="Budget donut chart"></canvas>
+            <div class="absolute inset-0 grid place-items-center pointer-events-none text-center">
+              <div><p class="text-xs uppercase tracking-widest text-slate-500" id="donut-label">Total CSR</p><p class="font-display font-extrabold text-3xl text-slate-900 dark:text-white" id="donut-value">₹1.00 Cr</p></div>
+            </div>
+          </div>
+          <div id="budget-detail" class="mt-5 w-full rounded-2xl p-4 bg-emerald-500/5 border border-emerald-500/20 text-sm min-h-[110px]"></div>
+        </div>
+        <ul id="budget-list" class="lg:col-span-3 grid gap-2 reveal"></ul>
+      </div>
+
+      <div class="section-head mt-16 reveal">
+        <span class="eyebrow"><i data-lucide="scale" class="w-4 h-4"></i>Ethics Scorecard</span>
+        <h2 class="section-title">Four Ethical Pillars</h2>
+        <p class="section-sub">Tap a card to flip it and see how Green Guardians satisfies each framework.</p>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="ethics-grid"></div>
+    </section>
+  </main>
+
+  <footer class="border-t border-slate-200 dark:border-white/5 mt-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row gap-3 justify-between text-sm text-slate-500">
+      <p>© 2026 ABC Manufacturing Ltd. · Green Guardians CSR Initiative · CIN-registered under Sec. 135, Companies Act 2013</p>
+      <a href="#hero" class="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1" id="back-top"><i data-lucide="arrow-up" class="w-4 h-4"></i>Back to top</a>
+    </div>
+  </footer>
+
+  <!-- Demo ping -->
+  <button id="ping-btn" class="fixed bottom-4 right-4 z-30 ping-btn" title="Presenter demo tool"><i data-lucide="satellite-dish" class="w-4 h-4"></i><span class="hidden sm:inline">Simulate Live Sensor Ping</span></button>
+  <div id="toast-stack" class="fixed top-20 right-4 left-4 sm:left-auto z-50 flex flex-col gap-2 items-end pointer-events-none"></div>
+
+  <!-- Report drawer -->
+  <div id="drawer-overlay" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity"></div>
+  <aside id="drawer" class="fixed z-50 bottom-0 left-0 right-0 sm:top-0 sm:left-auto sm:w-[440px] max-h-[92vh] sm:max-h-none rounded-t-3xl sm:rounded-none sm:rounded-l-3xl bg-white dark:bg-slate-900 shadow-2xl translate-y-full sm:translate-y-0 sm:translate-x-full transition-transform duration-300 overflow-y-auto" aria-hidden="true" role="dialog" aria-labelledby="drawer-title">
+    <div class="p-6">
+      <div class="flex items-start justify-between">
+        <div>
+          <span class="eyebrow eyebrow-amber"><i data-lucide="siren" class="w-4 h-4"></i>Village Grievance</span>
+          <h2 id="drawer-title" class="font-display font-extrabold text-2xl text-slate-900 dark:text-white mt-1">Water / Air Alert</h2>
+          <p class="text-sm text-slate-500 mt-1">A Guardian responds within 24 hrs. Every ticket is public.</p>
+        </div>
+        <button id="close-drawer" class="icon-btn" aria-label="Close"><i data-lucide="x" class="w-5 h-5"></i></button>
+      </div>
+      <form id="report-form" class="mt-6 space-y-5" novalidate>
+        <label class="block"><span class="f-lbl">Your Name</span>
+          <input id="f-name" type="text" class="f-input" placeholder="e.g. Meera Nair" autocomplete="name" maxlength="40" required />
+        </label>
+        <input id="f-website" name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0" />
+        <label class="block"><span class="f-lbl">Village</span>
+          <select id="f-village" class="f-input" required>
+            <option value="">Select your village…</option>
+            <option>Pachakkara (North)</option><option>Puzhayoram (East)</option><option>Kavumthazham (South)</option><option>Thengumpadam (West)</option><option>Manjadikunnu</option><option>Kuttikkadavu</option>
+          </select>
+        </label>
+        <div><span class="f-lbl">Issue Type</span>
+          <div class="grid grid-cols-3 gap-2 mt-1" id="f-type">
+            <label class="type-opt"><input type="radio" name="type" value="Water" checked /><span><i data-lucide="droplets" class="w-5 h-5"></i>Water</span></label>
+            <label class="type-opt"><input type="radio" name="type" value="Air" /><span><i data-lucide="wind" class="w-5 h-5"></i>Air</span></label>
+            <label class="type-opt"><input type="radio" name="type" value="Waste" /><span><i data-lucide="trash-2" class="w-5 h-5"></i>Waste</span></label>
+          </div>
+        </div>
+        <label class="block"><span class="f-lbl">Description</span>
+          <textarea id="f-desc" rows="4" class="f-input" placeholder="e.g. Hand-pump water looks cloudy since yesterday morning" required maxlength="300"></textarea>
+          <span class="block text-right text-[11px] text-slate-500 mt-1" id="desc-count">0/300</span>
+        </label>
+        <p id="form-error" class="hidden text-sm font-medium text-rose-600 dark:text-rose-400 bg-rose-500/10 border border-rose-500/30 rounded-xl px-3 py-2" role="alert"></p>
+        <p class="text-[11px] text-slate-500 flex gap-1.5"><i data-lucide="shield-check" class="w-3.5 h-3.5 shrink-0 text-emerald-500"></i>Spam-protected: 1 report/minute, 5/day per device. Abusive, duplicate or link-filled reports are rejected. Your name is shown publicly on the ticket.</p>
+        <button type="submit" class="cta-btn w-full justify-center !py-3" id="submit-report"><i data-lucide="send" class="w-4 h-4"></i>Submit Report</button>
+      </form>
+      <div id="report-success" class="hidden mt-6 text-center">
+        <div class="w-16 h-16 mx-auto rounded-full bg-emerald-500/15 grid place-items-center pop"><i data-lucide="check-circle-2" class="w-9 h-9 text-emerald-500"></i></div>
+        <p class="mt-4 text-sm text-slate-500">Ticket created</p>
+        <p class="font-mono font-bold text-3xl text-slate-900 dark:text-white" id="s-ticket"></p>
+        <div class="mt-5 rounded-2xl border border-slate-200 dark:border-white/10 p-4 flex items-center gap-3 text-left" id="s-guardian"></div>
+        <button class="ghost-btn w-full justify-center mt-5" id="s-close">View in live feed</button>
+      </div>
+    </div>
+  </aside>
+
+  <script src="app.js"></script>
+  <script src="fx.js"></script>
+</body>
+</html>
