@@ -81,7 +81,63 @@ export default async function handler(req, res) {
       return res.status(201).json({ ticket });
     }
 
-    res.setHeader('Allow', 'GET, POST');
+    if (req.method === 'PATCH') {
+      const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
+      const { id, status } = body;
+      if (!id || !['Assigned', 'In progress', 'Resolved'].includes(status)) {
+        return res.status(400).json({ error: 'Invalid ticket id or status' });
+      }
+      const raw = (await redis('LRANGE', LIST, 0, 59)) || [];
+      let updated = null;
+      const newList = raw.map(s => {
+        const item = JSON.parse(s);
+        if (item.id === id) {
+          item.status = status;
+          updated = item;
+        }
+        return JSON.stringify(item);
+      });
+      if (!updated) return res.status(404).json({ error: 'Ticket not found' });
+      await redis('DEL', LIST);
+      if (newList.length > 0) {
+        await redis('RPUSH', LIST, ...newList);
+      }
+      return res.status(200).json({ success: true, ticket: updated });
+    }
+
+    if (req.method === 'DELETE') {
+      const urlObj = new URL(req.url, 'http://localhost');
+      const id = urlObj.searchParams.get('id');
+      const reset = urlObj.searchParams.get('reset');
+
+      if (reset === 'true') {
+        await redis('DEL', LIST);
+        await redis('DEL', 'gg:seq');
+        return res.status(200).json({ success: true, reset: true });
+      }
+
+      if (!id) return res.status(400).json({ error: 'Missing ticket id' });
+
+      const raw = (await redis('LRANGE', LIST, 0, 59)) || [];
+      const remaining = [];
+      let found = false;
+      for (const s of raw) {
+        const item = JSON.parse(s);
+        if (item.id === id) {
+          found = true;
+        } else {
+          remaining.push(s);
+        }
+      }
+      if (!found) return res.status(404).json({ error: 'Ticket not found' });
+      await redis('DEL', LIST);
+      if (remaining.length > 0) {
+        await redis('RPUSH', LIST, ...remaining);
+      }
+      return res.status(200).json({ success: true, deleted: id });
+    }
+
+    res.setHeader('Allow', 'GET, POST, PATCH, DELETE');
     return res.status(405).json({ error: 'Method not allowed' });
   } catch (e) {
     return res.status(500).json({ error: 'Server error, please try again.' });

@@ -325,21 +325,123 @@
   ];
   const VILLAGE_GUARDIAN = { 'Pachakkara (North)': 0, 'Puzhayoram (East)': 1, 'Kavumthazham (South)': 2, 'Thengumpadam (West)': 3, 'Manjadikunnu': 1, 'Kuttikkadavu': 3 };
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const statusCls = s => s === 'Resolved' ? 'safe' : 'watch';
+  const statusCls = s => s === 'Resolved' ? 'safe' : s === 'In progress' ? 'info' : 'watch';
   const ago = ts => { const m = Math.round((Date.now() - ts) / 60000); if (m < 1) return 'Just now'; if (m < 60) return m + ' min ago'; const h = Math.round(m / 60); if (h < 24) return h + ' hr ago'; return new Date(ts).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }); };
   let LIVE = false, known = new Set(), localTickets = [...SEED];
 
   function ticketHTML(t, isNew) {
-    return `<li class="ticket ${isNew ? 'new' : ''}">
-      <div class="flex items-center justify-between gap-2"><span class="font-mono text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5"><i data-lucide="${TYPE_ICON[t.type] || 'circle'}" class="w-3.5 h-3.5 text-emerald-500"></i>#${esc(t.id)}</span><span class="status ${statusCls(t.status)}">${esc(t.status)}</span></div>
+    const isRes = t.status === 'Resolved', isProg = t.status === 'In progress';
+    const ic = isRes ? 'check-circle-2' : isProg ? 'clock' : 'alert-circle';
+    return `<li class="ticket ${isNew ? 'new' : ''}" data-id="${esc(t.id)}">
+      <div class="flex items-center justify-between gap-2">
+        <span class="font-mono text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5"><i data-lucide="${TYPE_ICON[t.type] || 'circle'}" class="w-3.5 h-3.5 text-emerald-500"></i>#${esc(t.id)}</span>
+        <div class="flex items-center gap-1.5">
+          <button class="status ${statusCls(t.status)} ticket-status-btn cursor-pointer transition hover:opacity-80 active:scale-95" title="Click to cycle status: Assigned → In progress → Resolved" data-id="${esc(t.id)}" data-status="${esc(t.status)}">
+            <i data-lucide="${ic}" class="w-3 h-3"></i>
+            <span>${esc(t.status)}</span>
+          </button>
+          <button class="ticket-del-btn text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 p-1 rounded-md transition" title="Delete this ticket" data-id="${esc(t.id)}">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
       <p class="text-sm text-slate-700 dark:text-slate-300 mt-1.5 line-clamp-2">${esc(t.desc)}</p>
-      <p class="text-[11px] text-slate-500 mt-1.5"><b class="text-slate-700 dark:text-slate-300">${esc(t.name)}</b> · ${esc(t.village)} · ${ago(t.ts)} · → ${esc(t.guardian)} (#${esc(String(t.gid).split('-')[1])})</p></li>`;
+      <p class="text-[11px] text-slate-500 mt-1.5"><b class="text-slate-700 dark:text-slate-300">${esc(t.name)}</b> · ${esc(t.village)} · ${ago(t.ts)} · → ${esc(t.guardian)} (#${esc(String(t.gid).split('-')[1])})</p>
+    </li>`;
   }
   function renderFeed(list, fresh = new Set()) {
     $('#ticket-feed').innerHTML = list.map(t => ticketHTML(t, fresh.has(t.id))).join('');
     $('#feed-mode').innerHTML = LIVE ? '<span class="pulse-dot"></span>Live · synced across devices' : 'Demo mode · this device only';
     icons();
   }
+
+  // Handle status cycling and ticket deletion
+  $('#ticket-feed').addEventListener('click', async e => {
+    // 1. Status cycling
+    const statusBtn = e.target.closest('.ticket-status-btn');
+    if (statusBtn) {
+      e.stopPropagation();
+      const id = statusBtn.dataset.id;
+      const cur = statusBtn.dataset.status;
+      const next = cur === 'Assigned' ? 'In progress' : cur === 'In progress' ? 'Resolved' : 'Assigned';
+
+      const item = localTickets.find(t => t.id === id) || SEED.find(t => t.id === id);
+      if (item) item.status = next;
+
+      statusBtn.className = `status ${statusCls(next)} ticket-status-btn cursor-pointer transition hover:opacity-80 active:scale-95`;
+      statusBtn.dataset.status = next;
+      const span = statusBtn.querySelector('span');
+      if (span) span.textContent = next;
+      const nextIc = next === 'Resolved' ? 'check-circle-2' : next === 'In progress' ? 'clock' : 'alert-circle';
+      const icEl = statusBtn.querySelector('i, svg');
+      if (icEl) {
+        icEl.outerHTML = `<i data-lucide="${nextIc}" class="w-3 h-3"></i>`;
+        icons();
+      }
+
+      toast('refresh-cw', `Ticket #${id} status updated`, `New status: ${next}`);
+
+      if (LIVE) {
+        try {
+          await fetch('/api/tickets', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, status: next })
+          });
+        } catch (err) {
+          console.error('Failed to sync status update:', err);
+        }
+      }
+      return;
+    }
+
+    // 2. Ticket deletion
+    const delBtn = e.target.closest('.ticket-del-btn');
+    if (delBtn) {
+      e.stopPropagation();
+      const id = delBtn.dataset.id;
+      if (!confirm(`Delete ticket #${id}?`)) return;
+
+      const li = delBtn.closest('li.ticket');
+      if (li) {
+        li.style.transition = 'opacity .25s, transform .25s';
+        li.style.opacity = '0';
+        li.style.transform = 'translateX(20px)';
+        setTimeout(() => li.remove(), 250);
+      }
+
+      localTickets = localTickets.filter(t => t.id !== id);
+      known.delete(id);
+
+      toast('trash-2', `Ticket #${id} deleted`, 'Removed from live feed');
+
+      if (LIVE) {
+        try {
+          await fetch(`/api/tickets?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+        } catch (err) {
+          console.error('Failed to sync deletion:', err);
+        }
+      }
+      return;
+    }
+  });
+
+  // Reset button in feed header
+  $('#reset-tickets-btn')?.addEventListener('click', async () => {
+    if (!confirm('Clear all submitted test tickets and reset back to baseline?')) return;
+    localTickets = [...SEED];
+    known.clear();
+    SEED.forEach(s => known.add(s.id));
+    renderFeed(localTickets);
+    toast('rotate-ccw', 'Feed reset', 'Test tickets cleared');
+    if (LIVE) {
+      try {
+        await fetch('/api/tickets?reset=true', { method: 'DELETE' });
+      } catch (err) {
+        console.error('Failed to sync reset:', err);
+      }
+    }
+  });
 
   async function loadTickets(first) {
     try {
