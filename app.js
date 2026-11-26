@@ -330,7 +330,7 @@
   let LIVE = false, known = new Set(), localTickets = [...SEED], currentTicketsList = [...SEED];
   let isModerator = sessionStorage.getItem('gg-admin') === 'true';
   let submissionsFrozen = false;
-  const getAdminPin = () => sessionStorage.getItem('gg-pin') || '2026';
+  const getAdminPin = () => sessionStorage.getItem('gg-pin') || '8492';
 
   function setFrozenState(frozen) {
     submissionsFrozen = !!frozen;
@@ -472,7 +472,7 @@
     } else {
       const pin = prompt('Enter Guardian Moderator PIN to unlock controls:');
       if (!pin) return;
-      if (pin === '2026') {
+      if (pin === '8492') {
         isModerator = true;
         sessionStorage.setItem('gg-admin', 'true');
         sessionStorage.setItem('gg-pin', pin);

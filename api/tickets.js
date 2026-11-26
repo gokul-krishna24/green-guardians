@@ -17,7 +17,7 @@ const TYPES = ['Water', 'Air', 'Waste'];
 const BAD_WORDS = ['fuck', 'shit', 'bitch', 'bastard', 'asshole', 'dick', 'porn', 'sex', 'idiot', 'stupid', 'loser', 'myre', 'myran', 'poori', 'thendi', 'kunna', 'pottan', 'naaye'];
 const LIST = 'gg:tickets';
 const MAX_KEEP = 60;
-const ADMIN_PIN = process.env.ADMIN_PIN || '2026';
+const ADMIN_PIN = process.env.ADMIN_PIN || '8492';
 
 const SEED_TICKETS = [
   { id: 'GG-2026-088', name: 'Lakshmi P.', village: 'Puzhayoram (East)', type: 'Water', desc: 'Slight odour from hand-pump near temple', guardian: 'Anoop Varghese', gid: 'GG-07', status: 'In progress', ts: Date.now() - 3 * 3600000 },
