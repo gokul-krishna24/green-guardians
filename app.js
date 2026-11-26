@@ -329,7 +329,33 @@
   const ago = ts => { const m = Math.round((Date.now() - ts) / 60000); if (m < 1) return 'Just now'; if (m < 60) return m + ' min ago'; const h = Math.round(m / 60); if (h < 24) return h + ' hr ago'; return new Date(ts).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }); };
   let LIVE = false, known = new Set(), localTickets = [...SEED], currentTicketsList = [...SEED];
   let isModerator = sessionStorage.getItem('gg-admin') === 'true';
+  let submissionsFrozen = false;
   const getAdminPin = () => sessionStorage.getItem('gg-pin') || '2026';
+
+  function setFrozenState(frozen) {
+    submissionsFrozen = !!frozen;
+    const notice = $('#drawer-frozen-notice');
+    const form = $('#report-form');
+    const freezeBtn = $('#toggle-freeze-btn');
+    const freezeLabel = $('#freeze-btn-label');
+    if (notice) notice.classList.toggle('hidden', !submissionsFrozen);
+    if (form) {
+      if (submissionsFrozen) form.classList.add('hidden');
+      else if ($('#report-success').classList.contains('hidden')) form.classList.remove('hidden');
+    }
+    if (freezeLabel) freezeLabel.textContent = submissionsFrozen ? 'Resume Reports' : 'Pause Reports';
+    if (freezeBtn) {
+      freezeBtn.classList.toggle('text-rose-500', submissionsFrozen);
+      freezeBtn.classList.toggle('text-amber-500', !submissionsFrozen);
+      freezeBtn.title = submissionsFrozen ? 'Resume new issue submissions' : 'Pause new issue submissions';
+      const ic = freezeBtn.querySelector('svg, i');
+      if (ic) {
+        ic.outerHTML = `<i data-lucide="${submissionsFrozen ? 'play-circle' : 'pause-circle'}" class="w-3.5 h-3.5"></i>`;
+        icons();
+      }
+    }
+    if (currentTicketsList) updateGlobalMetrics(currentTicketsList);
+  }
 
   function ticketHTML(t, isNew) {
     const isRes = t.status === 'Resolved', isProg = t.status === 'In progress';
@@ -383,6 +409,7 @@
         <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-amber-500/15 text-amber-600 dark:text-amber-400">Assigned: ${assigned}</span>
         <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-sky-500/15 text-sky-600 dark:text-sky-400">In Progress: ${inProgress}</span>
         <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">Resolved: ${resolved} (${pct}%)</span>
+        ${submissionsFrozen ? '<span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-rose-500/15 text-rose-600 dark:text-rose-400 flex items-center gap-1"><i data-lucide="pause-circle" class="w-3 h-3"></i>Reports Paused</span>' : ''}
       `;
     }
   }
@@ -398,6 +425,7 @@
   function updateModeratorUI() {
     const btn = $('#admin-lock-btn');
     const resetBtn = $('#reset-tickets-btn');
+    const freezeBtn = $('#toggle-freeze-btn');
     const hint = $('#moderator-hint');
     if (btn) {
       btn.innerHTML = `<i data-lucide="${isModerator ? 'unlock' : 'lock'}" class="w-3.5 h-3.5"></i>`;
@@ -407,10 +435,32 @@
       btn.title = isModerator ? 'Guardian Mode Active (Click to lock)' : 'Guardian Login (Moderator Mode)';
     }
     if (resetBtn) resetBtn.classList.toggle('hidden', !isModerator);
+    if (freezeBtn) freezeBtn.classList.toggle('hidden', !isModerator);
     if (hint) hint.classList.toggle('hidden', !isModerator);
     icons();
     renderFeed(currentTicketsList);
   }
+
+  $('#toggle-freeze-btn')?.addEventListener('click', async () => {
+    if (!isModerator) return;
+    const nextFrozen = !submissionsFrozen;
+    setFrozenState(nextFrozen);
+    toast(nextFrozen ? 'pause-circle' : 'play-circle', nextFrozen ? 'New Submissions Paused' : 'Submissions Resumed', nextFrozen ? 'Mass spam blocked during presentation' : 'Public reporting enabled');
+    if (LIVE) {
+      try {
+        await fetch('/api/tickets', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-admin-pin': getAdminPin()
+          },
+          body: JSON.stringify({ action: 'freeze', frozen: nextFrozen, pin: getAdminPin() })
+        });
+      } catch (err) {
+        console.error('Failed to sync freeze state:', err);
+      }
+    }
+  });
 
   $('#admin-lock-btn')?.addEventListener('click', () => {
     if (isModerator) {
@@ -529,6 +579,9 @@
       if (!r.ok) throw 0;
       const d = await r.json();
       LIVE = !!d.live;
+      if (typeof d.frozen === 'boolean' && d.frozen !== submissionsFrozen) {
+        setFrozenState(d.frozen);
+      }
       const list = d.tickets && d.tickets.length ? d.tickets : SEED;
       const fresh = new Set(first ? [] : list.filter(t => !known.has(t.id)).map(t => t.id));
       list.forEach(t => known.add(t.id));
@@ -574,6 +627,9 @@
 
   $('#report-form').addEventListener('submit', async e => {
     e.preventDefault(); showErr('');
+    if (submissionsFrozen) {
+      return showErr('New issue reporting is currently paused by the Guardian Desk.');
+    }
     const name = $('#f-name').value.trim().replace(/\s+/g, ' ');
     const village = $('#f-village').value, type = $('input[name=type]:checked').value, desc = $('#f-desc').value.trim().replace(/\s+/g, ' ');
     if ($('#f-website').value) return showErr('Spam detected.');

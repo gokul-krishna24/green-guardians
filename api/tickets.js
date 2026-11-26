@@ -62,16 +62,21 @@ export default async function handler(req, res) {
   try {
     if (req.method === 'GET') {
       let raw = (await redis('LRANGE', LIST, 0, 59)) || [];
+      const frozen = (await redis('GET', 'gg:frozen')) === '1';
       if (raw.length === 0) {
         for (let i = SEED_TICKETS.length - 1; i >= 0; i--) {
           await redis('LPUSH', LIST, JSON.stringify(SEED_TICKETS[i]));
         }
         raw = (await redis('LRANGE', LIST, 0, 59)) || [];
       }
-      return res.status(200).json({ live: true, tickets: raw.map(s => JSON.parse(s)) });
+      return res.status(200).json({ live: true, frozen, tickets: raw.map(s => JSON.parse(s)) });
     }
 
     if (req.method === 'POST') {
+      const isFrozen = (await redis('GET', 'gg:frozen')) === '1';
+      if (isFrozen) {
+        return res.status(423).json({ error: 'New issue submissions are temporarily paused by the Guardian Desk during the presentation.' });
+      }
       const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
       const v = validate(body);
       if (typeof v === 'string') return res.status(400).json({ error: v });
@@ -103,6 +108,11 @@ export default async function handler(req, res) {
       const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
       if (!isAuthorized(req, body)) {
         return res.status(401).json({ error: 'Unauthorized: Guardian moderator PIN required' });
+      }
+      if (body.action === 'freeze' || typeof body.frozen === 'boolean') {
+        const setVal = body.frozen ? '1' : '0';
+        await redis('SET', 'gg:frozen', setVal);
+        return res.status(200).json({ success: true, frozen: body.frozen });
       }
       const { id, status } = body;
       if (!id || !['Assigned', 'In progress', 'Resolved'].includes(status)) {
