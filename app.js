@@ -362,10 +362,36 @@
       <p class="text-[11px] text-slate-500 mt-1.5"><b class="text-slate-700 dark:text-slate-300">${esc(t.name)}</b> · ${esc(t.village)} · ${ago(t.ts)} · → ${esc(t.guardian)} (#${esc(String(t.gid).split('-')[1])})</p>
     </li>`;
   }
+  function updateGlobalMetrics(list) {
+    if (!list || !list.length) return;
+    const total = list.length;
+    const resolved = list.filter(t => t.status === 'Resolved').length;
+    const assigned = list.filter(t => t.status === 'Assigned').length;
+    const inProgress = list.filter(t => t.status === 'In progress').length;
+    const pct = Math.round((resolved / total) * 100);
+
+    const heroPct = $('#hero-resolved-pct');
+    if (heroPct) {
+      heroPct.textContent = pct;
+      heroPct.dataset.target = pct;
+    }
+
+    const sumEl = $('#ticket-summary-pills');
+    if (sumEl) {
+      sumEl.innerHTML = `
+        <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-200/60 dark:bg-slate-800 text-slate-700 dark:text-slate-300">Total: ${total}</span>
+        <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-amber-500/15 text-amber-600 dark:text-amber-400">Assigned: ${assigned}</span>
+        <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-sky-500/15 text-sky-600 dark:text-sky-400">In Progress: ${inProgress}</span>
+        <span class="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">Resolved: ${resolved} (${pct}%)</span>
+      `;
+    }
+  }
+
   function renderFeed(list, fresh = new Set()) {
     currentTicketsList = list;
     $('#ticket-feed').innerHTML = list.map(t => ticketHTML(t, fresh.has(t.id))).join('');
     $('#feed-mode').innerHTML = LIVE ? '<span class="pulse-dot"></span>Live · synced across devices' : 'Demo mode · this device only';
+    updateGlobalMetrics(list);
     icons();
   }
 
@@ -420,20 +446,9 @@
       const cur = statusBtn.dataset.status;
       const next = cur === 'Assigned' ? 'In progress' : cur === 'In progress' ? 'Resolved' : 'Assigned';
 
-      const item = localTickets.find(t => t.id === id) || SEED.find(t => t.id === id);
+      const item = currentTicketsList.find(t => t.id === id) || localTickets.find(t => t.id === id) || SEED.find(t => t.id === id);
       if (item) item.status = next;
-
-      statusBtn.className = `status ${statusCls(next)} ticket-status-btn cursor-pointer transition hover:opacity-80 active:scale-95`;
-      statusBtn.dataset.status = next;
-      const span = statusBtn.querySelector('span');
-      if (span) span.textContent = next;
-      const nextIc = next === 'Resolved' ? 'check-circle-2' : next === 'In progress' ? 'clock' : 'alert-circle';
-      const icEl = statusBtn.querySelector('i, svg');
-      if (icEl) {
-        icEl.outerHTML = `<i data-lucide="${nextIc}" class="w-3 h-3"></i>`;
-        icons();
-      }
-
+      renderFeed(currentTicketsList);
       toast('refresh-cw', `Ticket #${id} status updated`, `New status: ${next}`);
 
       if (LIVE) {
@@ -514,11 +529,12 @@
       if (!r.ok) throw 0;
       const d = await r.json();
       LIVE = !!d.live;
-      const list = [...d.tickets, ...SEED.filter(s => !d.tickets.some(t => t.id === s.id))];
-      const fresh = new Set(first ? [] : d.tickets.filter(t => !known.has(t.id)).map(t => t.id));
-      d.tickets.forEach(t => known.add(t.id));
-      if (first || fresh.size) renderFeed(list, fresh); else $$('#ticket-feed li').length && renderFeed(list);
-      fresh.forEach(id => { const t = d.tickets.find(x => x.id === id); if (t && t.id !== lastMine) toast('bell-ring', `New community ticket <b>#${esc(t.id)}</b>`, `${esc(t.type)} · ${esc(t.village)} · by ${esc(t.name)}`); });
+      const list = d.tickets && d.tickets.length ? d.tickets : SEED;
+      const fresh = new Set(first ? [] : list.filter(t => !known.has(t.id)).map(t => t.id));
+      list.forEach(t => known.add(t.id));
+      localTickets = list;
+      renderFeed(list, fresh);
+      fresh.forEach(id => { const t = list.find(x => x.id === id); if (t && t.id !== lastMine) toast('bell-ring', `New community ticket <b>#${esc(t.id)}</b>`, `${esc(t.type)} · ${esc(t.village)} · by ${esc(t.name)}`); });
     } catch { LIVE = false; if (first) renderFeed(localTickets); }
   }
   let lastMine = null;

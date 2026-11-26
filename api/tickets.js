@@ -19,6 +19,12 @@ const LIST = 'gg:tickets';
 const MAX_KEEP = 60;
 const ADMIN_PIN = process.env.ADMIN_PIN || '2026';
 
+const SEED_TICKETS = [
+  { id: 'GG-2026-088', name: 'Lakshmi P.', village: 'Puzhayoram (East)', type: 'Water', desc: 'Slight odour from hand-pump near temple', guardian: 'Anoop Varghese', gid: 'GG-07', status: 'In progress', ts: Date.now() - 3 * 3600000 },
+  { id: 'GG-2026-087', name: 'Thomas K.', village: 'Pachakkara (North)', type: 'Air', desc: 'Dust from trucks on school road during mornings', guardian: 'Arjun Menon', gid: 'GG-14', status: 'Resolved', ts: Date.now() - 26 * 3600000 },
+  { id: 'GG-2026-086', name: 'Fathima S.', village: 'Kuttikkadavu', type: 'Waste', desc: 'Packaging scrap dumped near canal bund', guardian: 'Sreejith Nair', gid: 'GG-31', status: 'Resolved', ts: Date.now() - 120 * 3600000 },
+];
+
 function isAuthorized(req, body = {}) {
   const pin = req.headers['x-admin-pin'] || body.pin || (new URL(req.url, 'http://localhost')).searchParams.get('pin');
   return pin === ADMIN_PIN;
@@ -55,7 +61,13 @@ export default async function handler(req, res) {
 
   try {
     if (req.method === 'GET') {
-      const raw = (await redis('LRANGE', LIST, 0, 29)) || [];
+      let raw = (await redis('LRANGE', LIST, 0, 59)) || [];
+      if (raw.length === 0) {
+        for (let i = SEED_TICKETS.length - 1; i >= 0; i--) {
+          await redis('LPUSH', LIST, JSON.stringify(SEED_TICKETS[i]));
+        }
+        raw = (await redis('LRANGE', LIST, 0, 59)) || [];
+      }
       return res.status(200).json({ live: true, tickets: raw.map(s => JSON.parse(s)) });
     }
 
@@ -96,9 +108,9 @@ export default async function handler(req, res) {
       if (!id || !['Assigned', 'In progress', 'Resolved'].includes(status)) {
         return res.status(400).json({ error: 'Invalid ticket id or status' });
       }
-      const raw = (await redis('LRANGE', LIST, 0, 59)) || [];
+      let raw = (await redis('LRANGE', LIST, 0, 59)) || [];
       let updated = null;
-      const newList = raw.map(s => {
+      let newList = raw.map(s => {
         const item = JSON.parse(s);
         if (item.id === id) {
           item.status = status;
@@ -106,6 +118,14 @@ export default async function handler(req, res) {
         }
         return JSON.stringify(item);
       });
+      // Fallback for initial seed tickets if not in raw yet
+      if (!updated) {
+        const seedItem = SEED_TICKETS.find(t => t.id === id);
+        if (seedItem) {
+          updated = { ...seedItem, status };
+          newList.unshift(JSON.stringify(updated));
+        }
+      }
       if (!updated) return res.status(404).json({ error: 'Ticket not found' });
       await redis('DEL', LIST);
       if (newList.length > 0) {
@@ -125,7 +145,10 @@ export default async function handler(req, res) {
       if (reset === 'true') {
         await redis('DEL', LIST);
         await redis('DEL', 'gg:seq');
-        return res.status(200).json({ success: true, reset: true });
+        for (let i = SEED_TICKETS.length - 1; i >= 0; i--) {
+          await redis('LPUSH', LIST, JSON.stringify(SEED_TICKETS[i]));
+        }
+        return res.status(200).json({ success: true, reset: true, tickets: SEED_TICKETS });
       }
 
       if (!id) return res.status(400).json({ error: 'Missing ticket id' });

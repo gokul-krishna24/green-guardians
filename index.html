@@ -82,7 +82,7 @@
       <div class="mt-10 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <div class="stat-card reveal"><i data-lucide="users" class="stat-ic"></i><div class="stat-num"><span class="counter" data-target="40">0</span></div><p class="stat-lbl">Certified Local Youth Guardians</p></div>
         <div class="stat-card reveal"><i data-lucide="file-check-2" class="stat-ic"></i><div class="stat-num"><span class="counter" data-target="12">0</span><span class="opacity-50">/12</span></div><p class="stat-lbl">Monthly Public Reports Published</p></div>
-        <div class="stat-card reveal"><i data-lucide="badge-check" class="stat-ic"></i><div class="stat-num"><span class="counter" data-target="86">0</span>%</div><p class="stat-lbl">Community Complaints Resolved (&lt;30 Days)</p></div>
+        <div class="stat-card reveal"><i data-lucide="badge-check" class="stat-ic"></i><div class="stat-num"><span class="counter" data-target="86" id="hero-resolved-pct">0</span>%</div><p class="stat-lbl">Community Complaints Resolved (&lt;30 Days)</p></div>
         <div class="stat-card reveal"><i data-lucide="wallet" class="stat-ic"></i><div class="stat-num">₹<span class="counter" data-target="1" data-decimals="2">0</span> Cr</div><p class="stat-lbl">Full Financial Transparency</p></div>
       </div>
     </section>
@@ -190,7 +190,8 @@
               <span class="pulse-dot"></span>
             </div>
           </div>
-          <ul id="ticket-feed" class="mt-4 space-y-3 max-h-80 overflow-y-auto pr-1"></ul>
+          <div id="ticket-summary-pills" class="flex flex-wrap gap-1.5 mt-3"></div>
+          <ul id="ticket-feed" class="mt-3 space-y-3 max-h-80 overflow-y-auto pr-1"></ul>
           <p id="feed-mode" class="mt-3 text-[11px] text-slate-500 flex items-center gap-2"></p>
           <p id="moderator-hint" class="hidden mt-1 text-[10px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1.5"><i data-lucide="shield-check" class="w-3 h-3"></i>Guardian Mode Active: Tap status badge to update · Tap trash icon to delete</p>
           <button class="ghost-btn w-full justify-center mt-4 open-report" id="open-report-feed"><i data-lucide="plus" class="w-4 h-4"></i>File a ticket</button>
