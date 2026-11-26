@@ -468,7 +468,7 @@
   const navIO = new IntersectionObserver(es => es.forEach(en => {
     if (en.isIntersecting) $$('.nav-link').forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + en.target.id));
   }), { rootMargin: '-45% 0px -50% 0px' });
-  ['monitor', 'actions', 'youth', 'budget'].forEach(id => navIO.observe(document.getElementById(id)));
+  ['monitor', 'actions', 'youth', 'budget', 'team'].forEach(id => navIO.observe(document.getElementById(id)));
 
   /* ---------- Init ---------- */
   icons();
