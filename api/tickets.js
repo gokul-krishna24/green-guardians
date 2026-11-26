@@ -17,6 +17,12 @@ const TYPES = ['Water', 'Air', 'Waste'];
 const BAD_WORDS = ['fuck', 'shit', 'bitch', 'bastard', 'asshole', 'dick', 'porn', 'sex', 'idiot', 'stupid', 'loser', 'myre', 'myran', 'poori', 'thendi', 'kunna', 'pottan', 'naaye'];
 const LIST = 'gg:tickets';
 const MAX_KEEP = 60;
+const ADMIN_PIN = process.env.ADMIN_PIN || '2026';
+
+function isAuthorized(req, body = {}) {
+  const pin = req.headers['x-admin-pin'] || body.pin || (new URL(req.url, 'http://localhost')).searchParams.get('pin');
+  return pin === ADMIN_PIN;
+}
 
 async function redis(...cmd) {
   const r = await fetch(URL_, { method: 'POST', headers: { Authorization: `Bearer ${TOKEN}`, 'Content-Type': 'application/json' }, body: JSON.stringify(cmd) });
@@ -83,6 +89,9 @@ export default async function handler(req, res) {
 
     if (req.method === 'PATCH') {
       const body = typeof req.body === 'string' ? JSON.parse(req.body || '{}') : (req.body || {});
+      if (!isAuthorized(req, body)) {
+        return res.status(401).json({ error: 'Unauthorized: Guardian moderator PIN required' });
+      }
       const { id, status } = body;
       if (!id || !['Assigned', 'In progress', 'Resolved'].includes(status)) {
         return res.status(400).json({ error: 'Invalid ticket id or status' });
@@ -107,6 +116,9 @@ export default async function handler(req, res) {
 
     if (req.method === 'DELETE') {
       const urlObj = new URL(req.url, 'http://localhost');
+      if (!isAuthorized(req)) {
+        return res.status(401).json({ error: 'Unauthorized: Guardian moderator PIN required' });
+      }
       const id = urlObj.searchParams.get('id');
       const reset = urlObj.searchParams.get('reset');
 

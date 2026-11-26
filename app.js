@@ -327,22 +327,35 @@
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const statusCls = s => s === 'Resolved' ? 'safe' : s === 'In progress' ? 'info' : 'watch';
   const ago = ts => { const m = Math.round((Date.now() - ts) / 60000); if (m < 1) return 'Just now'; if (m < 60) return m + ' min ago'; const h = Math.round(m / 60); if (h < 24) return h + ' hr ago'; return new Date(ts).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }); };
-  let LIVE = false, known = new Set(), localTickets = [...SEED];
+  let LIVE = false, known = new Set(), localTickets = [...SEED], currentTicketsList = [...SEED];
+  let isModerator = sessionStorage.getItem('gg-admin') === 'true';
+  const getAdminPin = () => sessionStorage.getItem('gg-pin') || '2026';
 
   function ticketHTML(t, isNew) {
     const isRes = t.status === 'Resolved', isProg = t.status === 'In progress';
     const ic = isRes ? 'check-circle-2' : isProg ? 'clock' : 'alert-circle';
+    const statusControl = isModerator
+      ? `<button class="status ${statusCls(t.status)} ticket-status-btn cursor-pointer transition hover:opacity-80 active:scale-95" title="Click to cycle status: Assigned → In progress → Resolved" data-id="${esc(t.id)}" data-status="${esc(t.status)}">
+          <i data-lucide="${ic}" class="w-3 h-3"></i>
+          <span>${esc(t.status)}</span>
+        </button>`
+      : `<span class="status ${statusCls(t.status)}">
+          <i data-lucide="${ic}" class="w-3 h-3"></i>
+          <span>${esc(t.status)}</span>
+        </span>`;
+
+    const delControl = isModerator
+      ? `<button class="ticket-del-btn text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 p-1 rounded-md transition" title="Delete this ticket" data-id="${esc(t.id)}">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+        </button>`
+      : '';
+
     return `<li class="ticket ${isNew ? 'new' : ''}" data-id="${esc(t.id)}">
       <div class="flex items-center justify-between gap-2">
         <span class="font-mono text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5"><i data-lucide="${TYPE_ICON[t.type] || 'circle'}" class="w-3.5 h-3.5 text-emerald-500"></i>#${esc(t.id)}</span>
         <div class="flex items-center gap-1.5">
-          <button class="status ${statusCls(t.status)} ticket-status-btn cursor-pointer transition hover:opacity-80 active:scale-95" title="Click to cycle status: Assigned → In progress → Resolved" data-id="${esc(t.id)}" data-status="${esc(t.status)}">
-            <i data-lucide="${ic}" class="w-3 h-3"></i>
-            <span>${esc(t.status)}</span>
-          </button>
-          <button class="ticket-del-btn text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 p-1 rounded-md transition" title="Delete this ticket" data-id="${esc(t.id)}">
-            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-          </button>
+          ${statusControl}
+          ${delControl}
         </div>
       </div>
       <p class="text-sm text-slate-700 dark:text-slate-300 mt-1.5 line-clamp-2">${esc(t.desc)}</p>
@@ -350,13 +363,55 @@
     </li>`;
   }
   function renderFeed(list, fresh = new Set()) {
+    currentTicketsList = list;
     $('#ticket-feed').innerHTML = list.map(t => ticketHTML(t, fresh.has(t.id))).join('');
     $('#feed-mode').innerHTML = LIVE ? '<span class="pulse-dot"></span>Live · synced across devices' : 'Demo mode · this device only';
     icons();
   }
 
-  // Handle status cycling and ticket deletion
+  function updateModeratorUI() {
+    const btn = $('#admin-lock-btn');
+    const resetBtn = $('#reset-tickets-btn');
+    const hint = $('#moderator-hint');
+    if (btn) {
+      btn.innerHTML = `<i data-lucide="${isModerator ? 'unlock' : 'lock'}" class="w-3.5 h-3.5"></i>`;
+      btn.classList.toggle('text-emerald-500', isModerator);
+      btn.classList.toggle('border-emerald-500', isModerator);
+      btn.classList.toggle('text-slate-400', !isModerator);
+      btn.title = isModerator ? 'Guardian Mode Active (Click to lock)' : 'Guardian Login (Moderator Mode)';
+    }
+    if (resetBtn) resetBtn.classList.toggle('hidden', !isModerator);
+    if (hint) hint.classList.toggle('hidden', !isModerator);
+    icons();
+    renderFeed(currentTicketsList);
+  }
+
+  $('#admin-lock-btn')?.addEventListener('click', () => {
+    if (isModerator) {
+      isModerator = false;
+      sessionStorage.removeItem('gg-admin');
+      sessionStorage.removeItem('gg-pin');
+      toast('lock', 'Guardian Mode Locked', 'Moderator controls disabled');
+      updateModeratorUI();
+    } else {
+      const pin = prompt('Enter Guardian Moderator PIN to unlock controls:');
+      if (!pin) return;
+      if (pin === '2026') {
+        isModerator = true;
+        sessionStorage.setItem('gg-admin', 'true');
+        sessionStorage.setItem('gg-pin', pin);
+        toast('shield-check', 'Guardian Mode Active', 'Ticket editing & deletion unlocked');
+        updateModeratorUI();
+      } else {
+        alert('Incorrect PIN. Moderator controls remained locked.');
+      }
+    }
+  });
+
+  // Handle status cycling and ticket deletion (only active when isModerator is true)
   $('#ticket-feed').addEventListener('click', async e => {
+    if (!isModerator) return;
+
     // 1. Status cycling
     const statusBtn = e.target.closest('.ticket-status-btn');
     if (statusBtn) {
@@ -385,8 +440,11 @@
         try {
           await fetch('/api/tickets', {
             method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id, status: next })
+            headers: {
+              'Content-Type': 'application/json',
+              'x-admin-pin': getAdminPin()
+            },
+            body: JSON.stringify({ id, status: next, pin: getAdminPin() })
           });
         } catch (err) {
           console.error('Failed to sync status update:', err);
@@ -417,7 +475,10 @@
 
       if (LIVE) {
         try {
-          await fetch(`/api/tickets?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+          await fetch(`/api/tickets?id=${encodeURIComponent(id)}&pin=${encodeURIComponent(getAdminPin())}`, {
+            method: 'DELETE',
+            headers: { 'x-admin-pin': getAdminPin() }
+          });
         } catch (err) {
           console.error('Failed to sync deletion:', err);
         }
@@ -426,8 +487,9 @@
     }
   });
 
-  // Reset button in feed header
+  // Reset button in feed header (only visible when isModerator is true)
   $('#reset-tickets-btn')?.addEventListener('click', async () => {
+    if (!isModerator) return;
     if (!confirm('Clear all submitted test tickets and reset back to baseline?')) return;
     localTickets = [...SEED];
     known.clear();
@@ -436,7 +498,10 @@
     toast('rotate-ccw', 'Feed reset', 'Test tickets cleared');
     if (LIVE) {
       try {
-        await fetch('/api/tickets?reset=true', { method: 'DELETE' });
+        await fetch(`/api/tickets?reset=true&pin=${encodeURIComponent(getAdminPin())}`, {
+          method: 'DELETE',
+          headers: { 'x-admin-pin': getAdminPin() }
+        });
       } catch (err) {
         console.error('Failed to sync reset:', err);
       }
@@ -577,4 +642,5 @@
   if (window.Chart) { Chart.defaults.font.family = 'Inter'; initTrend(); initBudget(); }
   selectStation(0);
   runCounters();
+  updateModeratorUI();
 })();
