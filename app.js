@@ -1,4 +1,4 @@
-/* Green Guardians — Community Environmental Transparency Dashboard */
+/* Green Guardians - Community Environmental Transparency Dashboard */
 (() => {
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -25,29 +25,29 @@
     { id: 1, name: 'North Village Well', dist: '500m', status: 'safe', label: 'Safe / Optimal',
       ph: 7.2, tds: 240, pm: 38, do: 6.8,
       trend: { pm25: [72, 64, 55, 48, 42, 38], tds: [410, 372, 330, 291, 262, 240] },
-      g: { name: 'Abhinand', id: 'GG-14', village: 'Pachakkara', color: 'from-emerald-400 to-teal-600', check: '12 Nov 2026, 11:20 AM', lab: 'EnviroLab Kochi (NABL TC-7741)' } },
+      g: { name: 'Arjun Menon', id: 'GG-14', village: 'Pachakkara', color: 'from-emerald-400 to-teal-600', check: '12 Nov 2026, 11:20 AM', lab: 'EnviroLab Kochi (NABL TC-7741)' } },
     { id: 2, name: 'East Stream Outflow', dist: '1.2km', status: 'watch', label: 'Action Taken (Watch)',
       ph: 7.1, tds: 228, pm: 44, do: 5.9,
       trend: { pm25: [81, 73, 66, 58, 51, 44], tds: [488, 446, 398, 352, 612, 228] },
-      g: { name: 'Gokul', id: 'GG-07', village: 'Puzhayoram', color: 'from-amber-400 to-orange-600', check: '16 Oct 2026, 03:05 PM', lab: 'EnviroLab Kochi (NABL TC-7741)' } },
+      g: { name: 'Anoop Varghese', id: 'GG-07', village: 'Puzhayoram', color: 'from-amber-400 to-orange-600', check: '16 Oct 2026, 03:05 PM', lab: 'EnviroLab Kochi (NABL TC-7741)' } },
     { id: 3, name: 'South Residential School', dist: '800m', status: 'safe', label: 'Safe / Optimal',
       ph: 7.4, tds: 198, pm: 31, do: 7.2,
       trend: { pm25: [63, 56, 49, 41, 35, 31], tds: [342, 311, 274, 240, 215, 198] },
-      g: { name: 'Sneha', id: 'GG-22', village: 'Kavumthazham', color: 'from-sky-400 to-indigo-600', check: '10 Nov 2026, 09:45 AM', lab: 'AquaTest Labs Thrissur (NABL TC-6120)' } },
+      g: { name: 'Lekha Pillai', id: 'GG-22', village: 'Kavumthazham', color: 'from-sky-400 to-indigo-600', check: '10 Nov 2026, 09:45 AM', lab: 'AquaTest Labs Thrissur (NABL TC-6120)' } },
     { id: 4, name: 'West Plant Boundary', dist: '50m', status: 'safe', label: 'Safe / Optimal',
       ph: 7.0, tds: 286, pm: 52, do: 6.4,
       trend: { pm25: [98, 88, 77, 67, 58, 52], tds: [468, 431, 384, 342, 305, 286] },
-      g: { name: 'Vishnu', id: 'GG-31', village: 'Thengumpadam', color: 'from-fuchsia-400 to-purple-600', check: '14 Nov 2026, 02:30 PM', lab: 'AquaTest Labs Thrissur (NABL TC-6120)' } },
+      g: { name: 'Sreejith Nair', id: 'GG-31', village: 'Thengumpadam', color: 'from-fuchsia-400 to-purple-600', check: '14 Nov 2026, 02:30 PM', lab: 'AquaTest Labs Thrissur (NABL TC-6120)' } },
   ];
   const EXTRA = [
-    ['Aleena', 'GG-03', 'from-rose-400 to-pink-600', 'Water Sampling'],
-    ['Aman', 'GG-05', 'from-lime-400 to-green-600', 'Air Monitoring'],
-    ['Dilna', 'GG-09', 'from-cyan-400 to-blue-600', 'Data & Reports'],
-    ['Femi', 'GG-11', 'from-violet-400 to-purple-600', 'Community Outreach'],
-    ['John', 'GG-16', 'from-orange-400 to-red-600', 'Sensor Maintenance'],
-    ['Jotham', 'GG-18', 'from-teal-400 to-emerald-600', 'Mini-Lab Analyst'],
-    ['Nandakishore', 'GG-20', 'from-yellow-400 to-amber-600', 'Green Belt Lead'],
-    ['Siya', 'GG-25', 'from-pink-400 to-fuchsia-600', 'Grievance Desk'],
+    ['Reshma Joseph', 'GG-03', 'from-rose-400 to-pink-600', 'Water Sampling'],
+    ['Faisal Rahman', 'GG-05', 'from-lime-400 to-green-600', 'Air Monitoring'],
+    ['Anjali Krishnan', 'GG-09', 'from-cyan-400 to-blue-600', 'Data & Reports'],
+    ['Neethu Thomas', 'GG-11', 'from-violet-400 to-purple-600', 'Community Outreach'],
+    ['Biju Mathew', 'GG-16', 'from-orange-400 to-red-600', 'Sensor Maintenance'],
+    ['Rahul Kurian', 'GG-18', 'from-teal-400 to-emerald-600', 'Mini-Lab Analyst'],
+    ['Hari Shankar', 'GG-20', 'from-yellow-400 to-amber-600', 'Green Belt Lead'],
+    ['Athira Mohan', 'GG-25', 'from-pink-400 to-fuchsia-600', 'Grievance Desk'],
   ].map(([name, id, color, role]) => ({ name, id, color, role }));
   const GUARDIANS = [
     ...STATIONS.map(s => ({ ...s.g, station: s.id, role: `Station ${s.id} Lead` })),
@@ -68,7 +68,7 @@
 
   /* ---------- Metric cards ---------- */
   const metricDefs = [
-    { key: 'ph', title: 'Water pH', icon: 'test-tube', unit: '', limit: 'Safe Limit 6.5 – 8.5', min: 0, max: 14, band: [6.5, 8.5], ok: v => v >= 6.5 && v <= 8.5, dec: 1 },
+    { key: 'ph', title: 'Water pH', icon: 'test-tube', unit: '', limit: 'Safe Limit 6.5 - 8.5', min: 0, max: 14, band: [6.5, 8.5], ok: v => v >= 6.5 && v <= 8.5, dec: 1 },
     { key: 'tds', title: 'Water TDS', icon: 'droplets', unit: 'ppm', limit: 'Limit < 500 ppm', min: 0, max: 700, cap: 500, ok: v => v < 500, dec: 0 },
     { key: 'pm', title: 'Air PM2.5', icon: 'wind', unit: 'µg/m³', limit: 'Limit < 60 µg/m³', min: 0, max: 100, cap: 60, ok: v => v < 60, dec: 0 },
     { key: 'do', title: 'Dissolved Oxygen', icon: 'waves', unit: 'mg/L', limit: 'Healthy > 5 mg/L', min: 0, max: 10, floor: 5, ok: v => v > 5, dec: 1 },
@@ -80,7 +80,7 @@
         <span class="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1.5"><i data-lucide="${m.icon}" class="w-4 h-4 text-emerald-500"></i>${m.title}</span>
         <span class="m-badge status safe">OK</span>
       </div>
-      <div class="mt-3 flex items-baseline gap-1"><span class="val">–</span><span class="text-sm text-slate-500">${m.unit}</span></div>
+      <div class="mt-3 flex items-baseline gap-1"><span class="val">-</span><span class="text-sm text-slate-500">${m.unit}</span></div>
       <div class="bar mt-4">${m.band ? `<span class="band" style="left:${m.band[0] / m.max * 100}%;width:${(m.band[1] - m.band[0]) / m.max * 100}%"></span>` : ''}<i style="width:0"></i>${m.band ? '<span class="marker" style="left:0"></span>' : ''}</div>
       <p class="text-[11px] sm:text-xs text-slate-500 mt-2 flex justify-between gap-2"><span>${m.limit}</span><span class="pct font-mono"></span></p>
     </div>`).join('');
@@ -170,7 +170,7 @@
     trendChart.data = trendData(s);
     trendChart.update();
     const v = s.trend[trendMetric], drop = Math.round((1 - v[5] / v[0]) * 100);
-    $('#trend-sub').innerHTML = `Station ${s.id} · Baseline (Jun) → Month 6 (Nov) · <b class="text-emerald-600 dark:text-emerald-400">↓ ${drop}% reduction</b>${s.id === 2 && trendMetric === 'tds' ? ' · <b class="text-rose-500">Oct spike shown — we publish bad numbers too</b>' : ''}`;
+    $('#trend-sub').innerHTML = `Station ${s.id} · Baseline (Jun) → Month 6 (Nov) · <b class="text-emerald-600 dark:text-emerald-400">↓ ${drop}% reduction</b>${s.id === 2 && trendMetric === 'tds' ? ' · <b class="text-rose-500">Oct spike shown - we publish bad numbers too</b>' : ''}`;
   }
   $('#trend-metric').addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
@@ -189,11 +189,11 @@
 
   /* ---------- Budget ---------- */
   const BUDGET = [
-    { name: 'Sensors, Mini Testing Lab & Training', amt: 30, color: '#10b981', icon: 'cpu', covers: 'IoT pH/TDS/DO probes, PM2.5 monitors at 4 stations, a village mini-lab and Guardian field training.', sch: 'Item (iv) — Environmental sustainability & ecological balance; quality of soil, air and water.' },
-    { name: 'Youth Stipends & ITI Certification (40 Youth)', amt: 30, color: '#14b8a6', icon: 'graduation-cap', covers: '₹6,000/month stipends and NCVT ITI Lab Technician certification for 40 local youth.', sch: 'Item (ii) — Promoting education incl. employment-enhancing vocational skills.' },
-    { name: 'Green Belt & Public Data Dashboard', amt: 15, color: '#22d3ee', icon: 'trees', covers: '3,000 native saplings along the plant boundary + this open dashboard and SMS alert system.', sch: 'Item (iv) — Environmental sustainability, agroforestry & conservation.' },
-    { name: 'Village Committee & Open-Day Events', amt: 10, color: '#6366f1', icon: 'users', covers: 'Quarterly open reviews, plant open-days and grievance-desk operations in 6 villages.', sch: 'Item (x) — Rural development projects.' },
-    { name: 'Independent Third-Party Audit', amt: 5, color: '#f59e0b', icon: 'file-search', covers: 'Quarterly NABL-accredited lab cross-checks and an annual independent CSR impact audit.', sch: 'Supports CSR Rules 2021 — impact assessment (Rule 8(3)).' },
+    { name: 'Sensors, Mini Testing Lab & Training', amt: 30, color: '#10b981', icon: 'cpu', covers: 'IoT pH/TDS/DO probes, PM2.5 monitors at 4 stations, a village mini-lab and Guardian field training.', sch: 'Item (iv) - Environmental sustainability & ecological balance; quality of soil, air and water.' },
+    { name: 'Youth Stipends & ITI Certification (40 Youth)', amt: 30, color: '#14b8a6', icon: 'graduation-cap', covers: '₹6,000/month stipends and NCVT ITI Lab Technician certification for 40 local youth.', sch: 'Item (ii) - Promoting education incl. employment-enhancing vocational skills.' },
+    { name: 'Green Belt & Public Data Dashboard', amt: 15, color: '#22d3ee', icon: 'trees', covers: '3,000 native saplings along the plant boundary + this open dashboard and SMS alert system.', sch: 'Item (iv) - Environmental sustainability, agroforestry & conservation.' },
+    { name: 'Village Committee & Open-Day Events', amt: 10, color: '#6366f1', icon: 'users', covers: 'Quarterly open reviews, plant open-days and grievance-desk operations in 6 villages.', sch: 'Item (x) - Rural development projects.' },
+    { name: 'Independent Third-Party Audit', amt: 5, color: '#f59e0b', icon: 'file-search', covers: 'Quarterly NABL-accredited lab cross-checks and an annual independent CSR impact audit.', sch: 'Supports CSR Rules 2021 - impact assessment (Rule 8(3)).' },
     { name: 'Contingency Reserve', amt: 10, color: '#94a3b8', icon: 'shield', covers: 'Rapid response to incidents (e.g., emergency filtration repair) and sensor replacement.', sch: 'Unspent amount transferred to Unspent CSR Account per Sec. 135(6).' },
   ];
   const bList = $('#budget-list');
@@ -212,7 +212,7 @@
     const d = $('#budget-detail');
     if (i == null) {
       $('#donut-label').textContent = 'Total CSR'; $('#donut-value').textContent = '₹1.00 Cr';
-      d.innerHTML = `<p class="text-slate-500">Select a slice or line item. 2% of avg. net profit (Sec. 135) — <b class="text-slate-900 dark:text-white">100% allocated, 0% admin overhead beyond 5% cap.</b></p>`;
+      d.innerHTML = `<p class="text-slate-500">Select a slice or line item. 2% of avg. net profit (Sec. 135) - <b class="text-slate-900 dark:text-white">100% allocated, 0% admin overhead beyond 5% cap.</b></p>`;
       budgetChart.setActiveElements([]); budgetChart.update(); return;
     }
     const b = BUDGET[i];
@@ -249,13 +249,13 @@
 
   /* ---------- Ethics flip cards ---------- */
   const ETHICS = [
-    { t: 'Stakeholder Theory', who: 'R. Edward Freeman', icon: 'network', c: 'from-emerald-500 to-teal-600', q: 'Firms owe duties to everyone affected — not just shareholders.',
+    { t: 'Stakeholder Theory', who: 'R. Edward Freeman', icon: 'network', c: 'from-emerald-500 to-teal-600', q: 'Firms owe duties to everyone affected - not just shareholders.',
       a: ['Villagers co-govern via the Village Committee', 'Local youth gain skills & income', 'Regulators get independent data', 'Shareholders gain social licence to operate'] },
     { t: 'Kantian Ethics', who: 'Right to Know', icon: 'eye', c: 'from-sky-500 to-indigo-600', q: 'Treat people as ends, never merely as means.',
-      a: ['Community has a categorical right to know what they breathe & drink', 'Bad numbers published — no deception', 'Universalisable rule: every plant should disclose', 'Consent through open reviews'] },
+      a: ['Community has a categorical right to know what they breathe & drink', 'Bad numbers published - no deception', 'Universalisable rule: every plant should disclose', 'Consent through open reviews'] },
     { t: 'Utilitarianism', who: 'Bentham & Mill', icon: 'heart-pulse', c: 'from-amber-500 to-orange-600', q: 'Maximise total well-being for the greatest number.',
       a: ['~12,000 residents protected by early alerts', 'PM2.5 down ~45% across stations', '40 livelihoods created', '₹1 Cr cost vs. avoided health & litigation costs'] },
-    { t: 'Triple Bottom Line', who: 'John Elkington', icon: 'layers', c: 'from-fuchsia-500 to-purple-600', q: 'People · Planet · Profit — measured together.',
+    { t: 'Triple Bottom Line', who: 'John Elkington', icon: 'layers', c: 'from-fuchsia-500 to-purple-600', q: 'People · Planet · Profit - measured together.',
       a: ['People: youth jobs, 86% grievances resolved', 'Planet: cleaner water, 3,000-tree green belt', 'Profit: trust, ESG ratings, lower regulatory risk', 'Audited quarterly, published monthly'] },
   ];
   $('#ethics-grid').innerHTML = ETHICS.map((e, i) => `
@@ -319,9 +319,9 @@
   const TYPE_ICON = { Water: 'droplets', Air: 'wind', Waste: 'trash-2' };
   const H = 3600e3, NOW = Date.now();
   const SEED = [
-    { id: 'GG-2026-088', name: 'Lakshmi P.', village: 'Puzhayoram (East)', type: 'Water', desc: 'Slight odour from hand-pump near temple', guardian: 'Gokul', gid: 'GG-07', status: 'In progress', ts: NOW - 3 * H },
-    { id: 'GG-2026-087', name: 'Thomas K.', village: 'Pachakkara (North)', type: 'Air', desc: 'Dust from trucks on school road during mornings', guardian: 'Abhinand', gid: 'GG-14', status: 'Resolved', ts: NOW - 26 * H },
-    { id: 'GG-2026-086', name: 'Fathima S.', village: 'Kuttikkadavu', type: 'Waste', desc: 'Packaging scrap dumped near canal bund', guardian: 'Vishnu', gid: 'GG-31', status: 'Resolved', ts: NOW - 5 * 24 * H },
+    { id: 'GG-2026-088', name: 'Lakshmi P.', village: 'Puzhayoram (East)', type: 'Water', desc: 'Slight odour from hand-pump near temple', guardian: 'Anoop Varghese', gid: 'GG-07', status: 'In progress', ts: NOW - 3 * H },
+    { id: 'GG-2026-087', name: 'Thomas K.', village: 'Pachakkara (North)', type: 'Air', desc: 'Dust from trucks on school road during mornings', guardian: 'Arjun Menon', gid: 'GG-14', status: 'Resolved', ts: NOW - 26 * H },
+    { id: 'GG-2026-086', name: 'Fathima S.', village: 'Kuttikkadavu', type: 'Waste', desc: 'Packaging scrap dumped near canal bund', guardian: 'Sreejith Nair', gid: 'GG-31', status: 'Resolved', ts: NOW - 5 * 24 * H },
   ];
   const VILLAGE_GUARDIAN = { 'Pachakkara (North)': 0, 'Puzhayoram (East)': 1, 'Kavumthazham (South)': 2, 'Thengumpadam (West)': 3, 'Manjadikunnu': 1, 'Kuttikkadavu': 3 };
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -375,7 +375,7 @@
   // Client-side checks mirror the server (server is the real gatekeeper)
   const BAD = ['fuck', 'shit', 'bitch', 'bastard', 'asshole', 'dick', 'porn', 'sex', 'idiot', 'stupid', 'loser', 'myre', 'myran', 'poori', 'thendi', 'kunna', 'pottan', 'naaye'];
   function clientValidate(name, desc) {
-    if (!/^[\p{L}\p{M}][\p{L}\p{M} .'-]{1,39}$/u.test(name)) return 'Enter a valid name (letters only, 2–40 characters).';
+    if (!/^[\p{L}\p{M}][\p{L}\p{M} .'-]{1,39}$/u.test(name)) return 'Enter a valid name (letters only, 2-40 characters).';
     if (desc.length < 15) return 'Description must be at least 15 characters.';
     if (desc.split(/\s+/).filter(w => w.length > 1).length < 3) return 'Please describe the issue in a few words.';
     if (/(https?:\/\/|www\.|\.com|\.in\b|@)/i.test(desc + name)) return 'Links, emails or handles are not allowed.';
@@ -448,8 +448,8 @@
     pingCount++;
     s.ph = ph;
     const now = new Date(), time = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-    toast('radio-tower', `New reading received from Station 2: pH ${ph} — Verified &amp; Logged`, `Guardian #07 (Gokul) · ${time}`);
-    $('#live-status').innerHTML = `<span class="pulse-dot"></span>System Active • Last Updated: Today, ${time} by Guardian #07 (Gokul)`;
+    toast('radio-tower', `New reading received from Station 2: pH ${ph} - Verified &amp; Logged`, `Guardian #07 (Anoop Varghese) · ${time}`);
+    $('#live-status').innerHTML = `<span class="pulse-dot"></span>System Active • Last Updated: Today, ${time} by Guardian #07 (Anoop Varghese)`;
     if (current === 1) renderMetrics(s, 'ph');
   });
 

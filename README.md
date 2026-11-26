@@ -1,4 +1,4 @@
-# Green Guardians — Community Environmental Transparency Dashboard
+# Green Guardians - Community Environmental Transparency Dashboard
 
 CSR initiative by ABC Manufacturing Ltd. Static site + one Vercel serverless function (`/api/tickets`) for real-time, spam-protected community tickets.
 
@@ -13,7 +13,7 @@ CSR initiative by ABC Manufacturing Ltd. Static site + one Vercel serverless fun
 The ticket feed footer shows **"Live · synced across devices"** when storage is connected; otherwise it falls back to **"Demo mode · this device only"**.
 
 ## Anti-spam (enforced server-side)
-- Required real name (letters only, 2–40 chars), 15–300 char description, min 3 words
+- Required real name (letters only, 2-40 chars), 15-300 char description, min 3 words
 - Hidden honeypot field + minimum 4 s form-fill time (bots)
 - 1 report / minute and 5 / day per IP; global cap 40 / 10 min
 - Duplicate report blocked for 1 hour

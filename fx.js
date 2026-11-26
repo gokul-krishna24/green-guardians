@@ -1,4 +1,4 @@
-/* Green Guardians — motion & cursor effects (desktop cursor FX, mobile touch FX) */
+/* Green Guardians - motion & cursor effects (desktop cursor FX, mobile touch FX) */
 (() => {
   const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;

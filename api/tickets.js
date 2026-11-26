@@ -6,12 +6,12 @@ const URL_ = process.env.UPSTASH_REDIS_REST_URL || process.env.KV_REST_API_URL;
 const TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.KV_REST_API_TOKEN;
 
 const VILLAGES = {
-  'Pachakkara (North)': ['Abhinand', 'GG-14'],
-  'Puzhayoram (East)': ['Gokul', 'GG-07'],
-  'Kavumthazham (South)': ['Sneha', 'GG-22'],
-  'Thengumpadam (West)': ['Vishnu', 'GG-31'],
-  'Manjadikunnu': ['Gokul', 'GG-07'],
-  'Kuttikkadavu': ['Vishnu', 'GG-31'],
+  'Pachakkara (North)': ['Arjun Menon', 'GG-14'],
+  'Puzhayoram (East)': ['Anoop Varghese', 'GG-07'],
+  'Kavumthazham (South)': ['Lekha Pillai', 'GG-22'],
+  'Thengumpadam (West)': ['Sreejith Nair', 'GG-31'],
+  'Manjadikunnu': ['Anoop Varghese', 'GG-07'],
+  'Kuttikkadavu': ['Sreejith Nair', 'GG-31'],
 };
 const TYPES = ['Water', 'Air', 'Waste'];
 const BAD_WORDS = ['fuck', 'shit', 'bitch', 'bastard', 'asshole', 'dick', 'porn', 'sex', 'idiot', 'stupid', 'loser', 'myre', 'myran', 'poori', 'thendi', 'kunna', 'pottan', 'naaye'];
@@ -30,10 +30,10 @@ function validate(b) {
   const village = String(b.village || ''), type = String(b.type || '');
   if (b.website) return 'Spam detected.';                                  // honeypot
   if (typeof b.elapsed !== 'number' || b.elapsed < 4000) return 'Please take a moment to fill the form properly.';
-  if (!/^[\p{L}\p{M}][\p{L}\p{M} .'-]{1,39}$/u.test(name)) return 'Enter a valid name (letters only, 2–40 characters).';
+  if (!/^[\p{L}\p{M}][\p{L}\p{M} .'-]{1,39}$/u.test(name)) return 'Enter a valid name (letters only, 2-40 characters).';
   if (!VILLAGES[village]) return 'Select a valid village.';
   if (!TYPES.includes(type)) return 'Select a valid issue type.';
-  if (desc.length < 15 || desc.length > 300) return 'Description must be 15–300 characters.';
+  if (desc.length < 15 || desc.length > 300) return 'Description must be 15-300 characters.';
   if (desc.split(' ').filter(w => w.length > 1).length < 3) return 'Please describe the issue in a few words.';
   if (/(https?:\/\/|www\.|\.com|\.in\b|@)/i.test(desc + name)) return 'Links, emails or handles are not allowed.';
   if (/(.)\1{4,}/u.test(desc + name)) return 'Please avoid repeated characters.';
@@ -68,7 +68,7 @@ export default async function handler(req, res) {
       // global flood guard: 40 / 10 min
       const g = await redis('INCR', 'gg:global');
       if (g === 1) await redis('EXPIRE', 'gg:global', 600);
-      if (g > 40) return res.status(429).json({ error: 'High traffic right now — please try again in a few minutes.' });
+      if (g > 40) return res.status(429).json({ error: 'High traffic right now - please try again in a few minutes.' });
       // duplicate text guard (1 hr)
       const key = (v.village + v.type + v.desc).toLowerCase().replace(/[^\p{L}\p{N}]/gu, '').slice(0, 120);
       if (!(await redis('SET', `gg:dup:${key}`, 1, 'EX', 3600, 'NX'))) return res.status(409).json({ error: 'This issue has already been reported.' });
